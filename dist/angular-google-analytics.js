@@ -193,7 +193,7 @@
         traceDebuggingMode = !!enableTraceDebugging;
         return this;
       };
-      
+
       // Enable reading page url from route object
       this.readFromRoute = function(val) {
         readFromRoute = !!val;
@@ -203,10 +203,10 @@
       /**
        * Public Service
        */
-      this.$get = ['$document', // To read title 
-                   '$location', // 
+      this.$get = ['$document', // To read title
+                   '$location', //
                    '$log',      //
-                   '$rootScope',// 
+                   '$rootScope',//
                    '$window',   //
                    '$injector', // To access ngRoute module without declaring a fixed dependency
                    function ($document, $location, $log, $rootScope, $window, $injector) {
@@ -230,7 +230,7 @@
           }
           return isPropertyDefined('name', config) ? (config.name + '.' + commandName) : commandName;
         };
-        
+
         // Try to read route configuration and log warning if not possible
         var $route = {};
         if (readFromRoute) {
@@ -241,15 +241,15 @@
           }
         }
 
-        // Get url for current page 
+        // Get url for current page
         var getUrl = function () {
           // Using ngRoute provided tracking urls
           if (readFromRoute && $route.current && ('pageTrack' in $route.current)) {
             return $route.current.pageTrack;
           }
-           
+
           // Otherwise go the old way
-          var url = trackUrlParams ? $location.url() : $location.path(); 
+          var url = trackUrlParams ? $location.url() : $location.path();
           return removeRegExp ? url.replace(removeRegExp, '') : url;
         };
 
@@ -350,9 +350,11 @@
 
         var _gaMultipleTrackers = function (includeFn) {
           // Drop the includeFn from the arguments and preserve the original command name
-          var args = Array.prototype.slice.call(arguments, 1),
+
+          var args = Array.prototype.slice.call(arguments, 1).filter(Boolean),
               commandName = args[0],
               trackers = [];
+
           if (typeof includeFn === 'function') {
             accounts.forEach(function (account) {
               if (includeFn(account)) {
@@ -362,6 +364,11 @@
           } else {
             // No include function indicates that all accounts are to be used
             trackers = accounts;
+            if(includeFn!=='undefined')
+            {
+              var indexAccount=_.findIndex(accounts, { 'name': includeFn});
+              trackers =indexAccount>=0?[accounts[indexAccount]]:accounts;
+            }
           }
 
           // To preserve backwards compatibility fallback to _ga method if no account
@@ -617,7 +624,7 @@
          * @param custom
          * @private
          */
-        this._trackPage = function (url, title, custom) {
+        this._trackPage = function (accountId, url, title, custom, acc) {
           url = url ? url : getUrl();
           title = title ? title : $document[0].title;
           _gaJs(function () {
@@ -634,7 +641,7 @@
             if (angular.isObject(custom)) {
               angular.extend(opt_fieldObject, custom);
             }
-            _gaMultipleTrackers(undefined, 'send', 'pageview', opt_fieldObject);
+            _gaMultipleTrackers(accountId, 'send', 'pageview', opt_fieldObject);
           });
         };
 
@@ -1100,7 +1107,7 @@
                 return;
               }
             }
-            
+
             that._trackPage();
           });
         }
@@ -1166,7 +1173,7 @@
             }
             return offlineMode;
           },
-          trackPage: function (url, title, custom) {
+          trackPage: function (accountId, url, title, custom) {
             that._trackPage.apply(that, arguments);
           },
           trackEvent: function (category, action, label, value, noninteraction, custom) {
