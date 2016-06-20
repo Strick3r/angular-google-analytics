@@ -370,11 +370,12 @@
           };
 
           var _gaMultipleTrackers = function(includeFn) {
-
             // Drop the includeFn from the arguments and preserve the original command name
+
             var args = Array.prototype.slice.call(arguments, 1).filter(Boolean),
               commandName = args[0],
               trackers = [];
+
             if (typeof includeFn === 'function') {
               accounts.forEach(function(account) {
                 if (includeFn(account)) {
@@ -382,7 +383,14 @@
                 }
               });
             } else {
-              trackers = includeFn?[includeFn]:accounts;
+              // No include function indicates that all accounts are to be used
+              trackers = accounts;
+              if (includeFn !== 'undefined') {
+                var indexAccount = _.findIndex(accounts, {
+                  'name': includeFn
+                });
+                trackers = indexAccount >= 0 ? [accounts[indexAccount]] : accounts;
+              }
             }
 
             // To preserve backwards compatibility fallback to _ga method if no account
@@ -650,11 +658,11 @@
            * @param custom
            * @private
            */
-          this._trackPage = function(accountId, url, title, custom) {
-            var accountSelected=undefined;
+          this._trackPage = function(accountId, url, title, custom, acc) {
             url = url ? url : getUrl();
             title = title ? title : $document[0].title;
             _gaJs(function() {
+              // http://stackoverflow.com/questions/7322288/how-can-i-set-a-page-title-with-google-analytics
               _gaq('_set', 'title', title);
               _gaq('_trackPageview', (trackPrefix + url));
             });
@@ -667,16 +675,7 @@
               if (angular.isObject(custom)) {
                 angular.extend(opt_fieldObject, custom);
               }
-              if (accountId) {
-                var accountIndex = _.findIndex(accounts, {
-                  'name': accountId
-                });
-                if (accountIndex >= 0) {
-                  accountSelected=accounts[accountIndex];
-                }
-              }
-              _gaMultipleTrackers(accountSelected, 'send', 'pageview', opt_fieldObject);
-
+              _gaMultipleTrackers(accountId, 'send', 'pageview', opt_fieldObject);
             });
           };
 
@@ -846,7 +845,7 @@
            * @param custom
            * @private
            */
-          this._addProduct = function(productId, name, category, brand, variant, price, quantity, coupon, position, custom) {
+          this._addProduct = function(productId, name, category, brand, variant, price, quantity, coupon, position, list, custom) {
             _gaJs(function() {
               _gaq('_addProduct', productId, name, category, brand, variant, price, quantity, coupon, position);
             });
@@ -864,7 +863,8 @@
                   price: price,
                   quantity: quantity,
                   coupon: coupon,
-                  position: position
+                  position: position,
+                  list: list
                 };
                 if (angular.isObject(custom)) {
                   angular.extend(details, custom);
@@ -961,6 +961,7 @@
                 var includeFn = function(trackerObj) {
                   return isPropertySetTo('trackEcommerce', trackerObj, true);
                 };
+
                 _gaMultipleTrackers(includeFn, 'ec:setAction', action, obj);
               }
             });
@@ -1226,7 +1227,7 @@
             clearTrans: function() {
               that._clearTrans.apply(that, arguments);
             },
-            addProduct: function(productId, name, category, brand, variant, price, quantity, coupon, position, custom) {
+            addProduct: function(productId, name, category, brand, variant, price, quantity, coupon, position, list, custom) {
               that._addProduct.apply(that, arguments);
             },
             addPromo: function(productId, name, creative, position) {
@@ -1275,34 +1276,7 @@
         }
       ];
     })
-    .directive('gaProductClick', ['Analytics', '$parse', function(Analytics, $parse) {
-      return {
-        restrict: 'A',
-        link: function(scope, element, attrs) {/*
-          var options = $parse(attrs.gaProductClick);
-          element.bind('click', function() {
-            if (options.length > 1) {
-              Analytics.trackEvent.apply(Analytics, options(scope));
-            }
-          });*/
-        }
-      };
-    }])
-  .directive('gaPromotionClick', ['Analytics', '$parse', function(Analytics, $parse) {
-      return {
-        restrict: 'A',
-        link: function(scope, element, attrs) {
 
-          var options = $parse(attrs.gaPromotionClick);
-          element.bind('click', function() {
-            if (options.length > 1) {
-              Analytics.addPromo.apply(Analytics, options(scope));
-              Analytics.promoClick.apply(Analytics, options(scope));
-            }
-          });
-        }
-      };
-    }])
   .directive('gaTrackEvent', ['Analytics', '$parse', function(Analytics, $parse) {
     return {
       restrict: 'A',
