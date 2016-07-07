@@ -1012,7 +1012,6 @@
            */
           this._trackDetail = function() {
             this._setAction('detail');
-            this._pageView();
           };
 
           /**
