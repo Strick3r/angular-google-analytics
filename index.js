@@ -185,7 +185,7 @@
         traceDebuggingMode = !!enableTraceDebugging;
         return this;
       };
-      
+
       // Enable reading page url from route object
       this.readFromRoute = function(val) {
         readFromRoute = !!val;
@@ -195,7 +195,7 @@
       /**
        * Public Service
        */
-      this.$get = ['$document', // To read page title 
+      this.$get = ['$document', // To read page title
                    '$location', //
                    '$log',      //
                    '$rootScope',//
@@ -222,7 +222,7 @@
           }
           return isPropertyDefined('name', config) ? (config.name + '.' + commandName) : commandName;
         };
-        
+
         // Try to read route configuration and log warning if not possible
         var $route = {};
         if (readFromRoute) {
@@ -233,15 +233,15 @@
           }
         }
 
-        // Get url for current page 
+        // Get url for current page
         var getUrl = function () {
           // Using ngRoute provided tracking urls
           if (readFromRoute && $route.current && ('pageTrack' in $route.current)) {
             return $route.current.pageTrack;
           }
-           
+
           // Otherwise go the old way
-          var url = trackUrlParams ? $location.url() : $location.path(); 
+          var url = trackUrlParams ? $location.url() : $location.path();
           return removeRegExp ? url.replace(removeRegExp, '') : url;
         };
 
@@ -354,12 +354,12 @@
           } else {
             // No include function indicates that all accounts are to be used
             trackers = accounts;
-             if (includeFn !== 'undefined') {
-                                var indexAccount = _.findIndex(accounts, {
-                                    'name': includeFn
-                                });
-                                trackers = indexAccount >= 0 ? [accounts[indexAccount]] : accounts;
-                            }
+            if (includeFn !== 'undefined') {
+              var indexAccount = _.findIndex(accounts, {
+                  'name': includeFn
+              });
+              trackers = indexAccount >= 0 ? [accounts[indexAccount]] : accounts;
+            }
           }
 
           // To preserve backwards compatibility fallback to _ga method if no account
@@ -1108,7 +1108,7 @@
                 return;
               }
             }
-            
+
             that._trackPage();
           });
         }

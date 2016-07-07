@@ -33,7 +33,7 @@ module.exports = function(grunt) {
       },
       dist: {
         src: ['<%= concat.dist.dest %>'],
-        dest: '<%= dirs.dest %>/<%= pkg.name %>.min.js'
+        dest: '<%= dirs.dest %>/aga.min.js'
       }
     },
     stage: {},
@@ -68,7 +68,8 @@ module.exports = function(grunt) {
         globals: {
           exports: true,
           angular: false,
-          $: false
+          $: false,
+          _: false
         }
       }
     },
@@ -119,6 +120,7 @@ module.exports = function(grunt) {
 
   // Build task.
   grunt.registerTask('build', ['test', 'concat', 'uglify']);
+  grunt.registerTask('build-no-test', ['jshint', 'concat', 'uglify']);
 
   // Release task.
   grunt.registerTask('release', ['build']);
