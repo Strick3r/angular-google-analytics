@@ -342,7 +342,7 @@
 
         var _gaMultipleTrackers = function (includeFn) {
           // Drop the includeFn from the arguments and preserve the original command name
-          var args = Array.prototype.slice.call(arguments, 1),
+          var args = Array.prototype.slice.call(arguments, 1).filter(Boolean),
               commandName = args[0],
               trackers = [];
           if (typeof includeFn === 'function') {
@@ -354,6 +354,12 @@
           } else {
             // No include function indicates that all accounts are to be used
             trackers = accounts;
+             if (includeFn !== 'undefined') {
+                                var indexAccount = _.findIndex(accounts, {
+                                    'name': includeFn
+                                });
+                                trackers = indexAccount >= 0 ? [accounts[indexAccount]] : accounts;
+                            }
           }
 
           // To preserve backwards compatibility fallback to _ga method if no account
@@ -622,7 +628,7 @@
          * @param custom
          * @private
          */
-        this._trackPage = function (url, title, custom) {
+        this._trackPage = function (accountId, url, title, custom) {
           url = url ? url : getUrl();
           title = title ? title : $document[0].title;
           _gaJs(function () {
@@ -639,7 +645,7 @@
             if (angular.isObject(custom)) {
               angular.extend(opt_fieldObject, custom);
             }
-            _gaMultipleTrackers(undefined, 'send', 'pageview', opt_fieldObject);
+            _gaMultipleTrackers(accountId, 'send', 'pageview', opt_fieldObject);
           });
         };
 
@@ -811,7 +817,7 @@
          * @param custom
          * @private
          */
-        this._addProduct = function (productId, name, category, brand, variant, price, quantity, coupon, position, custom) {
+        this._addProduct = function (productId, name, category, brand, variant, price, quantity, coupon, position, list, custom) {
           _gaJs(function () {
             _gaq('_addProduct', productId, name, category, brand, variant, price, quantity, coupon, position);
           });
@@ -829,7 +835,8 @@
                 price: price,
                 quantity: quantity,
                 coupon: coupon,
-                position: position
+                position: position,
+                list: list
               };
               if (angular.isObject(custom)) {
                 angular.extend(details, custom);
@@ -979,7 +986,6 @@
          */
         this._trackDetail = function () {
           this._setAction('detail');
-          this._pageView();
         };
 
         /**
@@ -1182,7 +1188,7 @@
             }
             return offlineMode;
           },
-          trackPage: function (url, title, custom) {
+          trackPage: function (accountId, url, title, custom) {
             that._trackPage.apply(that, arguments);
           },
           trackEvent: function (category, action, label, value, noninteraction, custom) {
@@ -1200,7 +1206,7 @@
           clearTrans: function () {
             that._clearTrans.apply(that, arguments);
           },
-          addProduct: function (productId, name, category, brand, variant, price, quantity, coupon, position, custom) {
+          addProduct: function (productId, name, category, brand, variant, price, quantity, coupon, position, list, custom) {
             that._addProduct.apply(that, arguments);
           },
           addPromo: function (productId, name, creative, position) {
