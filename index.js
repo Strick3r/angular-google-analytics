@@ -976,8 +976,8 @@
          * @param option
          * @private
          */
-        this._trackCheckOut = function (step, option) {
-          this._setAction('checkout', getActionFieldObject(null, null, null, null, null, null, null, step, option));
+        this._trackCheckOut = function (list, step, option) {
+          this._setAction('checkout', getActionFieldObject(null, null, null, null, null, null, list, step, option));
         };
 
         /**
